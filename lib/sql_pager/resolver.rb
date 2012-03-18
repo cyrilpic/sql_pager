@@ -5,6 +5,7 @@ module SqlPager
     
     protected
     def find_templates(name, prefix, partial, details)
+      prefix = normalize_prefix(prefix)
       locals = normalize_array(details[:locale])
       formats = normalize_array(details[:formats])
       conditions = {
@@ -27,6 +28,9 @@ module SqlPager
       end
     end
     
+    def normalize_prefix(prefix)
+      prefix == SqlPager.model_name.to_s.pluralize ? "" : prefix
+    end
     def normalize_path(name, prefix)
       prefix.present? ? "#{prefix}/#{name}" : name
     end
