@@ -1,4 +1,4 @@
-class Page < ActiveRecord::Base
+class EmailPage < ActiveRecord::Base
   # Attributes
   attr_accessible :body, :format, :handler, :path, :partial, :locale
     
@@ -12,5 +12,4 @@ class Page < ActiveRecord::Base
   after_save do
     SqlPager::Resolver.instance(self.class.model_name.underscore).clear_cache
   end
-  
 end

@@ -3,7 +3,7 @@ require 'test_helper'
 class ResolverTest < ActiveSupport::TestCase
   
   test "resolver returns a template with the saved body" do
-    resolver = SqlPager::Resolver.instance
+    resolver = SqlPager::Resolver.instance :page
     details_1 = { formats: [:html], locale: [:fr], handlers: [:erb] }
     details_2 = { formats: [:html], locale: [:en], handlers: [:erb] }
       

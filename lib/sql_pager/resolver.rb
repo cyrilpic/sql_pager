@@ -1,9 +1,46 @@
 module SqlPager
   class Resolver < ActionView::Resolver
     
-    include Singleton
+    # Provide only 
+    @@singleton__instances__ = {}
+    @@singleton__mutex__ = Mutex.new
+    def self.instance model = SqlPager.model_name, filter = nil
+      singleton_name = normalize_singleton_name(model, filter)
+      return @@singleton__instances__[singleton_name] if @@singleton__instances__[singleton_name]
+      @@singleton__mutex__.synchronize {
+        return @@singleton__instances__[singleton_name] if @@singleton__instances__[singleton_name]
+        @@singleton__instances__[singleton_name] = new(model, filter)
+      }
+      @@singleton__instances__[singleton_name]
+    end
     
-    protected
+    # Based on singleton
+    def _dump(depth = -1)
+      ''
+    end
+    def clone
+      raise TypeError, "can't clone instance of singleton #{self.class}"
+    end
+    def dup
+      raise TypeError, "can't dup instance of singleton #{self.class}"
+    end
+    
+    private
+    def self.normalize_singleton_name(model, filter)
+      if filter
+        "#{model.to_s}_#{filter.to_s}".to_sym
+      else
+        "#{model.to_s}".to_sym
+      end
+    end
+    
+    def initialize model, filter
+      @model = model.to_s.camelize.constantize
+      @filter = filter
+      super()
+    end
+    private_class_method :new
+    
     def find_templates(name, prefix, partial, details)
       prefix = normalize_prefix(prefix)
       locals = normalize_array(details[:locale])
@@ -15,8 +52,8 @@ module SqlPager
         locale: locals,
         partial: partial || false
       }
-      model = SqlPager.model_name.to_s.camelize.constantize
-      query = model.where(conditions)
+      conditions[SqlPager.filter_column] = @filter unless @filter.nil?
+      query = @model.where(conditions)
       if locals.count > 1
         query.order("FIELD(locale,#{order_clause(locals)})")
       end
@@ -29,7 +66,7 @@ module SqlPager
     end
     
     def normalize_prefix(prefix)
-      prefix == SqlPager.model_name.to_s.pluralize ? "" : prefix
+      prefix == @model.to_s.underscore.pluralize ? "" : prefix
     end
     def normalize_path(name, prefix)
       prefix.present? ? "#{prefix}/#{name}" : name
@@ -45,7 +82,7 @@ module SqlPager
     
     def initialize_template(record)
       source = record.body
-      identifier = "Page - #{record.id} - #{record.path.inspect}"
+      identifier = "#{@model.to_s} - #{record.id} - #{record.path.inspect}"
       handler = ActionView::Template.registered_template_handler(record.handler)
       
       details = {

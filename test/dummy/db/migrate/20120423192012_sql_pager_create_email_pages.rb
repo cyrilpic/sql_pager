@@ -1,6 +1,6 @@
-class SqlPagerCreate<%= table_name.camelize %> < ActiveRecord::Migration
+class SqlPagerCreateEmailPages < ActiveRecord::Migration
   def change
-    create_table :<%= table_name %> do |t|
+    create_table :email_pages do |t|
       t.text :body
       t.string :path
       t.string :format

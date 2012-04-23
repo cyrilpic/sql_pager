@@ -8,10 +8,6 @@ module SqlPager
       check_class_collision :suffix => "Controller"
       
       source_root File.expand_path("../templates", __FILE__)
-  
-      def create_initializer
-        invoke "sql_pager:install", [name]
-      end
       
       def create_controller
         template "controller.rb", File.join('app/controllers', class_path, "#{controller_file_name}_controller.rb")

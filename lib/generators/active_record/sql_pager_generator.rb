@@ -38,7 +38,7 @@ module ActiveRecord
   validates :path, :presence => true
     
   after_save do
-    SqlPager::Resolver.instance.clear_cache
+    SqlPager::Resolver.instance(self.class.model_name.underscore).clear_cache
   end
 CONTENT
       end
