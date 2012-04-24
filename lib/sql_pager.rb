@@ -18,6 +18,7 @@ module SqlPager
 end
 
 ActionController::Base.send(:include, SqlPager::ControllerHelper)
+ActionMailer::Base.send(:include, SqlPager::ControllerHelper)
 
 require 'sql_pager/railtie'
 
