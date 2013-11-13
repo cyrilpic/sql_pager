@@ -28,8 +28,10 @@ module ActiveRecord
       def model_data
 <<CONTENT
   # Attributes
-  attr_accessible :body, :format, :handler, :path, :partial, :locale
-    
+  if Gem::Requirement.new('< 4.0').satisfied_by?(Gem::Version.new(Rails.version.to_s))
+    attr_accessible :body, :format, :handler, :path, :partial, :locale
+  end
+  
   # Validation
   validates :body, :presence => true
   validates :handler, :inclusion => ActionView::Template::Handlers.extensions.map(&:to_s)
@@ -38,7 +40,7 @@ module ActiveRecord
   validates :path, :presence => true
     
   after_save do
-    SqlPager::Resolver.instance(self.class.model_name.underscore).clear_cache
+    SqlPager::Resolver.instance(self.class.model_name.to_s.underscore).clear_cache
   end
 CONTENT
       end
