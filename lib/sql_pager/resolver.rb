@@ -1,7 +1,7 @@
 module SqlPager
   class Resolver < ActionView::Resolver
-    
-    # Provide only 
+
+    # Provide only
     @@singleton__instances__ = {}
     @@singleton__mutex__ = Mutex.new
     def self.instance model = SqlPager.model_name, filter = nil
@@ -13,7 +13,7 @@ module SqlPager
       }
       @@singleton__instances__[singleton_name]
     end
-    
+
     # Based on singleton
     def _dump(depth = -1)
       ''
@@ -24,7 +24,7 @@ module SqlPager
     def dup
       raise TypeError, "can't dup instance of singleton #{self.class}"
     end
-    
+
     private
     def self.normalize_singleton_name(model, filter)
       if filter
@@ -33,15 +33,15 @@ module SqlPager
         "#{model.to_s}".to_sym
       end
     end
-    
+
     def initialize model, filter
       @model = model.to_s.camelize.constantize
       @filter = filter
       super()
     end
     private_class_method :new
-    
-    def find_templates(name, prefix, partial, details)
+
+    def find_templates(name, prefix, partial, details, outside_app_allowed=false)
       prefix = normalize_prefix(prefix)
       locals = normalize_array(details[:locale])
       formats = normalize_array(details[:formats])
@@ -64,7 +64,7 @@ module SqlPager
         initialize_template(record)
       end
     end
-    
+
     def normalize_prefix(prefix)
       prefix == @model.to_s.underscore.pluralize ? "" : prefix
     end
@@ -79,21 +79,21 @@ module SqlPager
         "\"#{el}\""
       }).join(",")
     end
-    
+
     def initialize_template(record)
       source = record.body
       identifier = "#{@model.to_s} - #{record.id} - #{record.path.inspect}"
       handler = ActionView::Template.registered_template_handler(record.handler)
-      
+
       details = {
         format: Mime[record.format],
         updated_at: record.updated_at,
         virtual_path: virtual_path(record)
       }
-      
+
       ActionView::Template.new source, identifier, handler, details
     end
-    
+
     def virtual_path(record)
       return record.path unless record.partial
       if index = record.path.rindex('/')
